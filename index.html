@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT 2026 — Countdown Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12151A;
+    --surface:#1B2027;
+    --surface2:#232935;
+    --line:#2C3340;
+    --amber:#E8A33D;
+    --amber-dim:#5A4526;
+    --teal:#4FA88F;
+    --coral:#D97D6A;
+    --text:#EDEFF2;
+    --muted:#8B93A1;
+    --muted2:#5C6474;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px 60px;}
+
+  /* HERO */
+  .hero{padding:36px 18px 28px;border-bottom:1px solid var(--line);position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;
+    background:radial-gradient(circle, rgba(232,163,61,0.14), transparent 70%);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;color:var(--amber);text-transform:uppercase;margin-bottom:10px;}
+  .hero h1{font-size:28px;line-height:1.15;margin:0 0 6px;font-weight:700;}
+  .hero .sub{color:var(--muted);font-size:14px;margin-bottom:22px;}
+  .countdown{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .count-num{font-size:56px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--amber);line-height:1;}
+  .count-label{font-size:13px;color:var(--muted);}
+  .phase-pill{margin-top:16px;display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--line);
+    padding:7px 14px;border-radius:20px;font-size:13px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px var(--amber-dim);}
+
+  /* PHASE TIMELINE */
+  .section{padding:28px 18px;border-bottom:1px solid var(--line);}
+  .section h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:0 0 16px;}
+  .timeline{display:flex;overflow-x:auto;gap:10px;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
+  .phase-card{min-width:150px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;flex-shrink:0;}
+  .phase-card.active{border-color:var(--amber);background:linear-gradient(180deg, rgba(232,163,61,0.10), var(--surface));}
+  .phase-card .pnum{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);}
+  .phase-card .ptitle{font-weight:600;font-size:14px;margin:4px 0 4px;}
+  .phase-card .pdate{font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .phase-card .pfocus{font-size:12px;color:var(--muted);line-height:1.4;}
+
+  /* DAILY SCHEDULE */
+  .toggle-row{display:flex;gap:8px;margin-bottom:16px;}
+  .toggle-btn{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--muted);padding:9px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .toggle-btn.active{background:var(--amber);color:#1B1300;border-color:var(--amber);font-weight:600;}
+  .day-block{border-left:2px solid var(--line);padding-left:16px;margin-left:6px;}
+  .slot{position:relative;padding-bottom:18px;}
+  .slot::before{content:"";position:absolute;left:-21px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--surface2);border:2px solid var(--muted2);}
+  .slot.qa::before{border-color:var(--teal);}
+  .slot.varc::before{border-color:var(--coral);}
+  .slot.dilr::before{border-color:var(--amber);}
+  .slot-time{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted2);}
+  .slot-title{font-weight:600;font-size:14px;margin:2px 0 2px;}
+  .slot-desc{font-size:12.5px;color:var(--muted);line-height:1.4;}
+  .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;}
+  .tag.qa{background:rgba(79,168,143,0.15);color:var(--teal);}
+  .tag.varc{background:rgba(217,125,106,0.15);color:var(--coral);}
+  .tag.dilr{background:rgba(232,163,61,0.15);color:var(--amber);}
+
+  /* WEEK ACCORDION */
+  .week-item{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+  .week-head{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;cursor:pointer;}
+  .week-head-left{display:flex;align-items:center;gap:10px;}
+  .wk-check{width:19px;height:19px;border-radius:5px;border:1.5px solid var(--muted2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .wk-check.done{background:var(--amber);border-color:var(--amber);}
+  .wk-check.done::after{content:"✓";font-size:12px;color:#1B1300;font-weight:700;}
+  .wk-title{font-size:13.5px;font-weight:600;}
+  .wk-dates{font-size:11px;color:var(--muted2);font-family:'IBM Plex Mono',monospace;}
+  .wk-phase-tag{font-size:10px;color:var(--muted);}
+  .chev{color:var(--muted2);font-size:12px;transition:transform .15s;}
+  .week-body{max-height:0;overflow:hidden;transition:max-height .2s ease;padding:0 14px;}
+  .week-body-inner{padding:2px 0 14px;border-top:1px solid var(--line);margin-top:2px;}
+  .wb-row{display:flex;gap:8px;margin-top:10px;font-size:12.5px;line-height:1.5;}
+  .wb-label{width:52px;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding-top:2px;}
+  .wb-label.qa{color:var(--teal);}
+  .wb-label.varc{color:var(--coral);}
+  .wb-label.dilr{color:var(--amber);}
+  .wb-label.mile{color:var(--muted);}
+  .wb-text{color:var(--muted);}
+
+  /* MOCK TRACKER */
+  .mock-form{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .mock-form input{background:var(--surface2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:9px 10px;font-size:13px;font-family:'Inter',sans-serif;flex:1;min-width:90px;}
+  .mock-form button{background:var(--amber);border:none;color:#1B1300;font-weight:600;padding:9px 16px;border-radius:7px;font-size:13px;cursor:pointer;}
+  .mock-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .mock-row:last-child{border-bottom:none;}
+  .mock-score{font-family:'IBM Plex Mono',monospace;color:var(--amber);font-weight:600;}
+  .mock-del{color:var(--muted2);cursor:pointer;font-size:12px;margin-left:10px;}
+  .sparkline{margin-top:10px;}
+  .empty{color:var(--muted2);font-size:12.5px;font-style:italic;padding:8px 0;}
+
+  .note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:12px 14px;font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:10px;}
+  ::-webkit-scrollbar{height:4px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="hero wrap" style="padding-left:0;padding-right:0;">
+  <div class="wrap">
+    <div class="eyebrow">Full-time prep · Aug 1 → Nov 29</div>
+    <h1>CAT 2026 Countdown</h1>
+    <div class="sub">IIM Indore · Sunday, Nov 29, 2026 · Slot TBD on admit card</div>
+    <div class="countdown">
+      <div>
+        <div class="count-num" id="daysLeft">--</div>
+        <div class="count-label">days to exam</div>
+      </div>
+      <div>
+        <div class="count-num" id="weekNum" style="font-size:28px;color:var(--text);">--</div>
+        <div class="count-label">of 17 prep weeks</div>
+      </div>
+    </div>
+    <div class="phase-pill"><span class="dot"></span><span id="phaseNow">Loading phase…</span></div>
+  </div>
+</div>
+
+<div class="wrap" style="padding:0;">
+
+  <div class="section">
+    <h2>Prep Phases</h2>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="section">
+    <h2>Daily Schedule Template</h2>
+    <div class="toggle-row">
+      <button class="toggle-btn active" data-day="weekday">Mon–Fri</button>
+      <button class="toggle-btn" data-day="saturday">Saturday</button>
+      <button class="toggle-btn" data-day="sunday">Sunday</button>
+    </div>
+    <div class="day-block" id="dayBlock"></div>
+    <div class="note" id="dayNote"></div>
+  </div>
+
+  <div class="section">
+    <h2>Week-by-Week Breakdown</h2>
+    <div id="weekList"></div>
+  </div>
+
+  <div class="section" style="border-bottom:none;">
+    <h2>Mock Test Tracker</h2>
+    <div class="mock-form">
+      <input type="date" id="mockDate">
+      <input type="number" id="mockScore" placeholder="Overall score">
+      <input type="number" id="mockPercentile" placeholder="%ile (opt.)">
+      <button id="addMock">Log</button>
+    </div>
+    <div id="mockList"></div>
+    <svg id="sparkline" class="sparkline" width="100%" height="60" viewBox="0 0 300 60" preserveAspectRatio="none"></svg>
+    <div class="note">Mocks begin Week 5 (weekly) → Week 8 onward (weekly full-length) → Week 12+ (twice weekly). Log every SimCAT/mock here to see your trend before it becomes an error-log exercise.</div>
+  </div>
+
+</div>
+
+<script>
+const EXAM_DATE = new Date("2026-11-29T00:00:00");
+const START_DATE = new Date("2026-08-01T00:00:00");
+
+function fmt(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+// ---- Phases ----
+const phases = [
+  {n:1, title:"Foundation", start:0, end:20, focus:"Concept building across QA/VARC/DILR. Diagnostic mock. Formula sheet starts."},
+  {n:2, title:"Skill Building", start:21, end:48, focus:"Algebra, Geometry, TSD, timed RC & VA drills, DI/LR sets. Weekly sectionals begin."},
+  {n:3, title:"Integration", start:49, end:76, focus:"P&C, Probability, full VARC/DILR under time. Weekly full mocks begin."},
+  {n:4, title:"Peak Mocks", start:77, end:97, focus:"2 mocks/week. Official 2021–23 papers under strict conditions. Error-log driven revision."},
+  {n:5, title:"Final Sprint", start:98, end:111, focus:"2–3 mocks/week. Attempt order & time-allocation strategy. Pure revision, no new topics."},
+  {n:6, title:"Taper & Exam", start:112, end:120, focus:"Light touch only. Sleep aligned to slot time. Rest, formula skim, admit card check."},
+];
+
+const today = new Date(); today.setHours(0,0,0,0);
+const dayIndex = Math.floor((today - START_DATE)/(1000*60*60*24));
+const daysLeft = Math.ceil((EXAM_DATE - today)/(1000*60*60*24));
+document.getElementById('daysLeft').textContent = daysLeft >= 0 ? daysLeft : 0;
+document.getElementById('weekNum').textContent = dayIndex>=0 && dayIndex<=120 ? Math.min(17, Math.floor(dayIndex/7)+1) : (dayIndex<0? '—' : 17);
+
+let currentPhase = phases.find(p=>dayIndex>=p.start && dayIndex<=p.end);
+if(!currentPhase) currentPhase = dayIndex<0 ? null : phases[phases.length-1];
+document.getElementById('phaseNow').textContent = currentPhase ? `Phase ${currentPhase.n} — ${currentPhase.title}` : "Prep hasn't started yet";
+
+const timelineEl = document.getElementById('timeline');
+phases.forEach(p=>{
+  const s = addDays(START_DATE, p.start), e = addDays(START_DATE, p.end);
+  const div = document.createElement('div');
+  div.className = 'phase-card' + (currentPhase && p.n===currentPhase.n ? ' active' : '');
+  div.innerHTML = `<div class="pnum">PHASE ${String(p.n).padStart(2,'0')}</div>
+    <div class="ptitle">${p.title}</div>
+    <div class="pdate">${fmt(s)} – ${fmt(e)}</div>
+    <div class="pfocus">${p.focus}</div>`;
+  timelineEl.appendChild(div);
+});
+
+// ---- Daily schedule ----
+const schedules = {
+  weekday: {
+    note: "~7.5 focused hours. Swap VA-type drills daily: para-jumbles → summary → odd-one-out → para-completion, on rotation.",
+    slots: [
+      {t:"7:00–8:00", c:"", title:"Wake + Editorial reading", d:"One quality editorial (Hindu/Livemint) for vocab + RC stamina, note 5 new words."},
+      {t:"8:00–10:00", c:"qa", title:"QA — Concept + Practice", d:"Today's topic: theory (30 min) → 25-question practice set → mark errors."},
+      {t:"10:00–10:15", c:"", title:"Break"},
+      {t:"10:15–11:30", c:"varc", title:"VARC — 2 RC passages", d:"Timed, 10 min/passage incl. questions. Review wrong options — why the trap worked."},
+      {t:"11:30–12:30", c:"dilr", title:"DILR — Set 1", d:"One DI or LR set, 15–18 min, then untimed re-solve if wrong."},
+      {t:"12:30–1:30", c:"", title:"Lunch"},
+      {t:"1:30–3:00", c:"qa", title:"QA — Practice + error log", d:"Fresh set + revisit yesterday's mistakes from error log."},
+      {t:"3:00–4:00", c:"varc", title:"VA drill (rotating type)", d:"20 questions of the day's VA type, timed."},
+      {t:"4:00–5:00", c:"dilr", title:"DILR — Set 2", d:"Second set, different topic than Set 1 (e.g. games/tournament if Set 1 was DI table)."},
+      {t:"5:00–5:30", c:"", title:"Break"},
+      {t:"5:30–6:30", c:"", title:"Formula revision + flashcards", d:"10 min formula sheet skim, 20 min vocab flashcards, log today's errors."},
+    ]
+  },
+  saturday: {
+    note: "Lighter day. From Week 5 onward: sectional test (1 section, timed) instead of the morning QA/VARC/DILR split.",
+    slots: [
+      {t:"8:00–9:30", c:"", title:"Sectional test", d:"One full section (QA or VARC or DILR, rotate weekly), exam conditions, no pause."},
+      {t:"9:30–10:30", c:"", title:"Sectional analysis", d:"Every wrong/skipped question — why, and the 10-second decision that should've been made."},
+      {t:"10:30–12:30", c:"", title:"Weak-topic deep dive", d:"Pick the weakest topic from this week's error log, redo theory + 20 fresh questions."},
+      {t:"12:30–2:00", c:"", title:"Break / lunch"},
+      {t:"2:00–4:00", c:"", title:"Previous year paper (older sets)", d:"Cracku/PYQ sets 2017–2020, one section at a time, building comfort with real difficulty."},
+      {t:"4:00–5:00", c:"", title:"Week review + plan next week", d:"Update error log summary, flag topics to revisit, set next week's focus."},
+    ]
+  },
+  sunday: {
+    note: "From Week 5: this becomes Mock Day. Before that, use it for an untimed full syllabus review + rest.",
+    slots: [
+      {t:"8:30–11:30", c:"", title:"Full-length mock (3 hrs)", d:"Strict exam conditions — same start time as your likely slot, no phone, no pause."},
+      {t:"11:30–12:00", c:"", title:"Cool-down break"},
+      {t:"12:00–2:30", c:"", title:"Deep mock analysis", d:"Section-wise: accuracy, time/question, attempt order effectiveness. Update error log by topic."},
+      {t:"2:30–3:30", c:"", title:"Rest / lunch"},
+      {t:"3:30–4:30", c:"", title:"Fix 3 patterns", d:"Pick 3 recurring mistakes from today's mock, drill 10 targeted questions on each."},
+      {t:"Evening", c:"", title:"Rest", d:"Genuinely switch off — this is a 6-day week, protect the recovery day."},
+    ]
+  }
+};
+
+function renderDay(key){
+  const s = schedules[key];
+  const el = document.getElementById('dayBlock');
+  el.innerHTML = s.slots.map(sl => `
+    <div class="slot ${sl.c}">
+      <div class="slot-time">${sl.t}</div>
+      <div class="slot-title">${sl.title}${sl.c?`<span class="tag ${sl.c}">${sl.c.toUpperCase()}</span>`:''}</div>
+      ${sl.d?`<div class="slot-desc">${sl.d}</div>`:''}
+    </div>`).join('');
+  document.getElementById('dayNote').textContent = s.note;
+}
+renderDay('weekday');
+document.querySelectorAll('.toggle-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDay(btn.dataset.day);
+  });
+});
+
+// ---- Week by week data ----
+const weeks = [
+  {w:1, ph:1, qa:"★ Arithmetic — Percentages, Profit & Loss, Ratios & Proportion", varc:"Untimed RC (2/day) for accuracy; vocab list starts", dilr:"Basic DI: tables, bar/line/pie charts", mile:"Diagnostic mock (baseline, no pressure) — Sun"},
+  {w:2, ph:1, qa:"★ Arithmetic — Averages, Mixtures & Alligations, SI & CI", varc:"RC continues; intro para-jumbles", dilr:"Basic LR: seating arrangement, blood relations", mile:"Build error-log system; formula sheet v1"},
+  {w:3, ph:1, qa:"★ Arithmetic — Time-Speed-Distance, Time & Work, Pipes & Cisterns", varc:"Para-summary + odd-one-out intro", dilr:"Venn diagrams, basic data sufficiency", mile:"First sectional test (any one section) — Sat"},
+  {w:4, ph:2, qa:"★ Arithmetic consolidation — mixed practice across all of the above", varc:"RC timed (10 min/passage) begins", dilr:"Combination DI sets (2 charts together)", mile:"Sectional tests every Sat from here"},
+  {w:5, ph:2, qa:"★ Algebra — Linear & Quadratic Equations, Simultaneous Equations", varc:"All VA types on rotation", dilr:"Games & tournaments, arrangement puzzles", mile:"★ First full mock — Sun (weekly from now)"},
+  {w:6, ph:2, qa:"★ Algebra — Functions, Logarithms, Inequalities", varc:"Abstract/philosophy passage practice", dilr:"Data sufficiency, caselets", mile:"Weekly mock + Cracku PYQ 2017 sectional"},
+  {w:7, ph:2, qa:"★ Algebra — Progressions (AP/GP/HP) + mixed algebra practice", varc:"Science/business passage practice", dilr:"Mixed DI+LR sets under 15 min", mile:"Mid-phase review: rank weak topics"},
+  {w:8, ph:3, qa:"Number Systems — divisibility, remainders, factors", varc:"Full VARC section timed (40 min)", dilr:"Full DILR section timed (40 min)", mile:"Full mocks now weekly + PYQ 2018"},
+  {w:9, ph:3, qa:"Geometry & Mensuration — lines, triangles, circles, 2D/3D", varc:"Critical reasoning / inference questions", dilr:"Puzzle-heavy sets (scheduling, distribution)", mile:"PYQ 2019 sectional; error log review"},
+  {w:10, ph:3, qa:"Modern Math — Permutations & Combinations, Probability, Sets", varc:"Mixed passage difficulty, strict timing", dilr:"Speed round: 3 sets in 40 min drills", mile:"PYQ 2020; identify top-3 weak areas"},
+  {w:11, ph:3, qa:"Mixed QA sets — all topics combined, Arithmetic/Algebra weighted higher", varc:"Full mock-length VARC only", dilr:"Full mock-length DILR only", mile:"Full mock + full syllabus checkpoint"},
+  {w:12, ph:4, qa:"Targeted revision — weakest topic only", varc:"Targeted revision — weakest RC/VA type", dilr:"Targeted revision — weakest set type", mile:"★ 2 mocks/week starts; PYQ 2021 (strict)"},
+  {w:13, ph:4, qa:"Speed drills — 30q in 30 min sets", varc:"Speed drills — full section, no re-reading", dilr:"Speed drills — attempt-order experiments", mile:"2 mocks + PYQ 2022 (strict)"},
+  {w:14, ph:4, qa:"Error-log only — no new topics", varc:"Error-log only — no new topics", dilr:"Error-log only — no new topics", mile:"2 mocks + PYQ 2023 (strict)"},
+  {w:15, ph:5, qa:"Formula sheet revision, mixed drills", varc:"Vocab + RC stamina maintenance", dilr:"Attempt-order finalisation", mile:"★★ 3 mocks/week — peak intensity"},
+  {w:16, ph:5, qa:"Only mistakes from error log", varc:"Only mistakes from error log", dilr:"Only mistakes from error log", mile:"2–3 mocks; lock final attempt strategy"},
+  {w:17, ph:6, qa:"Light skim only (Mon–Wed), then stop", varc:"Light reading only, maintain rhythm", dilr:"No new practice — confidence only", mile:"Nov 21–24: 1 light mock max. Nov 25–28: rest, admit card, logistics. Nov 29: exam."},
+];
+
+const weekListEl = document.getElementById('weekList');
+const phaseNames = {1:"Foundation",2:"Skill Building",3:"Integration",4:"Peak Mocks",5:"Final Sprint",6:"Taper"};
+
+function loadDoneWeeks(){
+  return window.storage && window.storage.get ? window.storage.get('cat2026:weeks-done') : Promise.resolve(null);
+}
+
+(async function initWeeks(){
+  let doneSet = new Set();
+  try{
+    const res = await window.storage.get('cat2026:weeks-done');
+    if(res && res.value) doneSet = new Set(JSON.parse(res.value));
+  }catch(e){ /* no data yet */ }
+
+  weeks.forEach(wk=>{
+    const s = addDays(START_DATE, (wk.w-1)*7);
+    const e = addDays(START_DATE, (wk.w-1)*7 + 6);
+    const item = document.createElement('div');
+    item.className = 'week-item';
+    const isDone = doneSet.has(wk.w);
+    item.innerHTML = `
+      <div class="week-head">
+        <div class="week-head-left">
+          <div class="wk-check ${isDone?'done':''}" data-w="${wk.w}"></div>
+          <div>
+            <div class="wk-title">Week ${wk.w} <span class="wk-phase-tag">· ${phaseNames[wk.ph]}</span></div>
+            <div class="wk-dates">${fmt(s)} – ${fmt(e)}</div>
+          </div>
+        </div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="week-body">
+        <div class="week-body-inner">
+          <div class="wb-row"><div class="wb-label qa">QA</div><div class="wb-text">${wk.qa}</div></div>
+          <div class="wb-row"><div class="wb-label varc">VARC</div><div class="wb-text">${wk.varc}</div></div>
+          <div class="wb-row"><div class="wb-label dilr">DILR</div><div class="wb-text">${wk.dilr}</div></div>
+          <div class="wb-row"><div class="wb-label mile">MILESTONE</div><div class="wb-text">${wk.mile}</div></div>
+        </div>
+      </div>`;
+    weekListEl.appendChild(item);
+
+    const head = item.querySelector('.week-head');
+    const body = item.querySelector('.week-body');
+    const chev = item.querySelector('.chev');
+    head.addEventListener('click', (ev)=>{
+      if(ev.target.classList.contains('wk-check')) return;
+      const open = body.style.maxHeight && body.style.maxHeight !== '0px';
+      body.style.maxHeight = open ? '0px' : body.scrollHeight + 'px';
+      chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+
+    const check = item.querySelector('.wk-check');
+    check.addEventListener('click', async ()=>{
+      check.classList.toggle('done');
+      if(check.classList.contains('done')) doneSet.add(wk.w); else doneSet.delete(wk.w);
+      try{ await window.storage.set('cat2026:weeks-done', JSON.stringify([...doneSet])); }catch(e){}
+    });
+  });
+
+  // auto-open current week
+  if(dayIndex>=0 && dayIndex<=120){
+    const curWeekNum = Math.min(17, Math.floor(dayIndex/7)+1);
+    const items = weekListEl.querySelectorAll('.week-item');
+    const target = items[curWeekNum-1];
+    if(target){
+      const body = target.querySelector('.week-body');
+      const chev = target.querySelector('.chev');
+      body.style.maxHeight = body.scrollHeight + 'px';
+      chev.style.transform = 'rotate(180deg)';
+      target.scrollIntoView({block:'center', behavior:'smooth'});
+    }
+  }
+})();
+
+// ---- Mock tracker ----
+const mockListEl = document.getElementById('mockList');
+const sparkEl = document.getElementById('sparkline');
+
+async function loadMocks(){
+  try{
+    const res = await window.storage.get('cat2026:mocks');
+    return res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ return []; }
+}
+async function saveMocks(mocks){
+  try{ await window.storage.set('cat2026:mocks', JSON.stringify(mocks)); }catch(e){}
+}
+
+function renderMocks(mocks){
+  mocks.sort((a,b)=> new Date(a.date) - new Date(b.date));
+  if(mocks.length===0){
+    mockListEl.innerHTML = '<div class="empty">No mocks logged yet — your first one lands in Week 5.</div>';
+    sparkEl.innerHTML = '';
+    return;
+  }
+  mockListEl.innerHTML = mocks.map((m,i)=>`
+    <div class="mock-row">
+      <div>${fmt(new Date(m.date))}</div>
+      <div><span class="mock-score">${m.score}</span>${m.percentile?` <span style="color:var(--muted);font-size:11px;">(${m.percentile}%ile)</span>`:''}
+      <span class="mock-del" data-i="${i}">✕</span></div>
+    </div>`).join('');
+
+  mockListEl.querySelectorAll('.mock-del').forEach(x=>{
+    x.addEventListener('click', async ()=>{
+      const i = parseInt(x.dataset.i);
+      mocks.splice(i,1);
+      await saveMocks(mocks);
+      renderMocks(mocks);
+    });
+  });
+
+  if(mocks.length>1){
+    const scores = mocks.map(m=>parseFloat(m.score));
+    const min = Math.min(...scores), max = Math.max(...scores);
+    const range = max-min || 1;
+    const w=300, h=60, pad=6;
+    const pts = scores.map((s,i)=>{
+      const x = pad + (i/(scores.length-1)) * (w-2*pad);
+      const y = h-pad - ((s-min)/range)*(h-2*pad);
+      return `${x},${y}`;
+    }).join(' ');
+    sparkEl.innerHTML = `<polyline points="${pts}" fill="none" stroke="#E8A33D" stroke-width="2"/>` +
+      scores.map((s,i)=>{
+        const x = pad + (i/(scores.length-1)) * (w-2*pad);
+        const y = h-pad - ((s-min)/range)*(h-2*pad);
+        return `<circle cx="${x}" cy="${y}" r="3" fill="#E8A33D"/>`;
+      }).join('');
+  } else {
+    sparkEl.innerHTML = '';
+  }
+}
+
+(async function initMocks(){
+  const mocks = await loadMocks();
+  renderMocks(mocks);
+
+  document.getElementById('addMock').addEventListener('click', async ()=>{
+    const date = document.getElementById('mockDate').value;
+    const score = document.getElementById('mockScore').value;
+    const percentile = document.getElementById('mockPercentile').value;
+    if(!date || score===''){ return; }
+    const mocks = await loadMocks();
+    mocks.push({date, score, percentile});
+    await saveMocks(mocks);
+    renderMocks(mocks);
+    document.getElementById('mockScore').value='';
+    document.getElementById('mockPercentile').value='';
+  });
+})();
+</script>
+</body>
+</html>
