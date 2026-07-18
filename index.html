@@ -135,6 +135,28 @@
   .rc-del{color:var(--muted2);cursor:pointer;font-size:12px;margin-left:10px;}
   ::-webkit-scrollbar{height:4px;}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+
+  /* MOTIVATION CARD */
+  .motivate-card{margin-top:18px;background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;}
+  .motivate-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:30px;color:var(--amber);line-height:1;flex-shrink:0;}
+  .motivate-num sup{font-size:13px;color:var(--amber);}
+  .motivate-text{font-size:13.5px;color:var(--text);line-height:1.4;flex:1;}
+  .motivate-shuffle{background:none;border:1px solid var(--line);color:var(--muted);width:30px;height:30px;border-radius:50%;
+    cursor:pointer;font-size:15px;flex-shrink:0;line-height:1;}
+  .motivate-shuffle:hover{color:var(--amber);border-color:var(--amber);}
+
+  /* DESKTOP LAYOUT */
+  @media (min-width:960px){
+    .wrap{max-width:1180px;}
+    #dashboardGrid{display:grid;grid-template-columns:1.35fr 1fr;column-gap:28px;align-items:start;}
+    #dashboardGrid .section{border:1px solid var(--line);border-radius:14px;background:var(--surface);
+      padding:22px 24px;margin-bottom:22px;}
+    #dashboardGrid .section.col-main{grid-column:1;}
+    #dashboardGrid .section.col-side{grid-column:2;}
+    .hero{padding:44px 32px 32px;}
+    .hero h1{font-size:34px;}
+  }
 </style>
 </head>
 <body>
@@ -155,17 +177,22 @@
       </div>
     </div>
     <div class="phase-pill"><span class="dot"></span><span id="phaseNow">Loading phase…</span></div>
+    <div class="motivate-card">
+      <div class="motivate-num">99<sup>th</sup></div>
+      <div class="motivate-text" id="motivateText">Loading…</div>
+      <button class="motivate-shuffle" id="motivateShuffle" aria-label="New line" title="New line">↻</button>
+    </div>
   </div>
 </div>
 
-<div class="wrap" style="padding:0;">
+<div class="wrap" style="padding:0;" id="dashboardGrid">
 
-  <div class="section">
+  <div class="section col-main">
     <h2>Prep Phases</h2>
     <div class="timeline" id="timeline"></div>
   </div>
 
-  <div class="section">
+  <div class="section col-main">
     <h2>Daily Schedule Template</h2>
     <div class="toggle-row">
       <button class="toggle-btn active" data-day="weekday">Mon–Fri</button>
@@ -176,12 +203,12 @@
     <div class="note" id="dayNote"></div>
   </div>
 
-  <div class="section">
+  <div class="section col-main">
     <h2>Week-by-Week Breakdown</h2>
     <div id="weekList"></div>
   </div>
 
-  <div class="section">
+  <div class="section col-side">
     <h2>Topic Checklist</h2>
     <div class="toggle-row" id="topicSubjectToggle">
       <button class="toggle-btn active" data-subject="qa">QA</button>
@@ -197,7 +224,7 @@
     <div id="topicGroups"></div>
   </div>
 
-  <div class="section">
+  <div class="section col-side">
     <h2>RC Practice Log</h2>
     <div class="topic-overall">
       <div>
@@ -214,7 +241,7 @@
     <div id="rcList"></div>
   </div>
 
-  <div class="section" style="border-bottom:none;">
+  <div class="section col-side" style="border-bottom:none;">
     <h2>Mock Test Tracker</h2>
     <div class="mock-form">
       <input type="date" id="mockDate">
@@ -424,6 +451,34 @@ function loadDoneWeeks(){
     }
   }
 })();
+
+// ---- Motivational quote ----
+const motivationLines = [
+  "99%ile isn't luck. It's the mock nobody saw you analyse at 11pm.",
+  "The gap between 95 and 99 is built in weeks exactly like this one.",
+  "Every RC you finish today is a mark you don't lose on Nov 29.",
+  "Nobody remembers the revision sessions. Everybody remembers the call letter.",
+  "You don't need talent for this. You need today's session done.",
+  "Every error logged today is a mark banked for November.",
+  "The percentile doesn't ask how you felt. It asks what you solved.",
+  "3 focused hours today, 3 tomorrow — that's how 99th percentile gets built.",
+  "The score you're chasing is made of ordinary days like this one, repeated.",
+  "Discipline is boring. 99th percentile is not.",
+  "The version of you that scores 99 is built one error log at a time.",
+  "Consistency beats intensity — show up today, even for the 20-minute version.",
+  "The mock you bombed today is tuition for the one you'll ace in November.",
+  "Nov 29 doesn't care about your mood. It cares about your reps.",
+  "Every topic you check off is one less thing between you and 99.",
+];
+let lastMotivationIdx = -1;
+function showMotivation(){
+  let idx;
+  do{ idx = Math.floor(Math.random()*motivationLines.length); } while(idx===lastMotivationIdx && motivationLines.length>1);
+  lastMotivationIdx = idx;
+  document.getElementById('motivateText').textContent = motivationLines[idx];
+}
+showMotivation();
+document.getElementById('motivateShuffle').addEventListener('click', showMotivation);
 
 // ---- Topic checklist ----
 const topicData = {
