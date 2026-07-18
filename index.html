@@ -149,11 +149,11 @@
   /* DESKTOP LAYOUT */
   @media (min-width:960px){
     .wrap{max-width:1180px;}
-    #dashboardGrid{display:grid;grid-template-columns:1.35fr 1fr;column-gap:28px;align-items:start;}
+    #dashboardGrid{display:flex;align-items:flex-start;gap:28px;}
+    #dashboardGrid > .col-main-wrap{flex:1.35;min-width:0;}
+    #dashboardGrid > .col-side-wrap{flex:1;min-width:0;}
     #dashboardGrid .section{border:1px solid var(--line);border-radius:14px;background:var(--surface);
       padding:22px 24px;margin-bottom:22px;}
-    #dashboardGrid .section.col-main{grid-column:1;}
-    #dashboardGrid .section.col-side{grid-column:2;}
     .hero{padding:44px 32px 32px;}
     .hero h1{font-size:34px;}
   }
@@ -187,6 +187,7 @@
 
 <div class="wrap" style="padding:0;" id="dashboardGrid">
 
+  <div class="col-main-wrap">
   <div class="section col-main">
     <h2>Prep Phases</h2>
     <div class="timeline" id="timeline"></div>
@@ -207,7 +208,9 @@
     <h2>Week-by-Week Breakdown</h2>
     <div id="weekList"></div>
   </div>
+  </div>
 
+  <div class="col-side-wrap">
   <div class="section col-side">
     <h2>Topic Checklist</h2>
     <div class="toggle-row" id="topicSubjectToggle">
@@ -252,6 +255,7 @@
     <div id="mockList"></div>
     <svg id="sparkline" class="sparkline" width="100%" height="60" viewBox="0 0 300 60" preserveAspectRatio="none"></svg>
     <div class="note">Mocks begin Week 5 (weekly) → Week 8 onward (weekly full-length) → Week 12+ (twice weekly). Log every SimCAT/mock here to see your trend before it becomes an error-log exercise.</div>
+  </div>
   </div>
 
 </div>
